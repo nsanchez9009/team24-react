@@ -22,8 +22,8 @@ const Home: React.FC = () => {
           style={{ width: '150px', height: 'auto' }}
         />
         <div className="d-grid gap-2 col-8 mx-auto">
-          <button onClick={handleRegisterClick} className="btn btn-primary">register</button>
-          <button onClick={handleLoginClick} className="btn btn-primary">login</button>
+          <button onClick={handleRegisterClick} className="btn btn-primary">Register</button>
+          <button onClick={handleLoginClick} className="btn btn-primary">Login</button>
         </div>
       </div>
 
