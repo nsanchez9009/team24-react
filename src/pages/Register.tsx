@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { API_URL } from '../config.ts';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -13,9 +14,7 @@ const Register: React.FC = () => {
   const [emailError, setEmailError] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-
-  // Placeholder backend URL
-  const backendUrl = 'https://your-backend-url.com/api/register';
+  const backendUrl = `${API_URL}/auth/register`;
 
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,7 +54,7 @@ const Register: React.FC = () => {
       setTimeout(() => navigate('/login'), 1500);
 
     } catch (err) {
-      setError(err.message || 'An error occurred during registration.');
+      setError((err as Error).message || 'An error occurred during registration.');
       setSuccess('');
     }
   };

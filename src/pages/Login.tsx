@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { API_URL } from '../config';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ const Login: React.FC = () => {
     username: '',
     password: '',
   });
+  const [error, setError] = useState('');
+  const backendUrl = `${API_URL}/auth/login`;
 
   // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,13 +19,33 @@ const Login: React.FC = () => {
     setForm({ ...form, [name]: value });
   };
 
-  // Placeholder login function
-  const handleLogin = () => {
-    alert('Login functionality to be implemented');
+  // Login function with API call
+  const handleLogin = async () => {
+    try {
+        const response = await fetch(backendUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(form),
+        });
+
+        if (!response.ok) {
+            throw new Error('Invalid credentials');
+        }
+
+        const data = await response.json();
+
+        // Save token (or session data)
+        localStorage.setItem('token', data.token);
+
+        // Redirect to CourseHome page
+        navigate('/course-home');
+    } catch (err) {
+      setError('Login failed. Please check your credentials and try again.');
+    }
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center">
+    <div className="container d-flex justify-content-center align-items-center vh-100">
       <div className="bg-light p-4 rounded shadow" style={{ width: '100%', maxWidth: '400px' }}>
         <h2 className="text-center mb-4">Login</h2>
 
@@ -57,6 +80,9 @@ const Login: React.FC = () => {
             <small className="text-primary" style={{ cursor: 'pointer' }}>Forgot password?</small>
           </div>
         </div>
+
+        {/* Error Message */}
+        {error && <div className="alert alert-danger text-center">{error}</div>}
 
         {/* Login Button */}
         <button onClick={handleLogin} className="btn btn-primary w-100 mb-3">Login</button>

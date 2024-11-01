@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link } f
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import CourseHome from './pages/CourseHome';
 
 const AppHeader: React.FC = () => {
   const location = useLocation();
@@ -35,6 +36,7 @@ const App: React.FC = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/course-home" element={<CourseHome />} />
           </Routes>
         </div>
       </div>
