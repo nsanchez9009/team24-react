@@ -47,7 +47,7 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div className="container d-flex justify-content-center align-items-center">
       <div className="bg-light p-4 rounded shadow" style={{ width: '100%', maxWidth: '400px' }}>
         <h2 className="text-center mb-4">Login</h2>
 
