@@ -46,7 +46,6 @@ const Register: React.FC = () => {
         throw new Error('Failed to register. Please try again.');
       }
 
-      const data = await response.json();
       setSuccess('Registration successful!');
       setError('');
       

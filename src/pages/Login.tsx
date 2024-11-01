@@ -32,10 +32,12 @@ const Login: React.FC = () => {
             throw new Error('Invalid credentials');
         }
 
+        // Parse the JSON response to get the token
         const data = await response.json();
+        const token = data.token;
 
-        // Save token (or session data)
-        localStorage.setItem('token', data.token);
+        // Store the JWT in sessionStorage
+        sessionStorage.setItem('token', token);
 
         // Redirect to CourseHome page
         navigate('/course-home');
