@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import CourseHome from './pages/CourseHome';
+import VerifyEmail from './pages/VerifyEmail';
 
 const AppHeader: React.FC = () => {
   const location = useLocation();
@@ -51,6 +52,7 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/course-home" element={<CourseHome />} />
             <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
           </Routes>
         </div>
       </div>
