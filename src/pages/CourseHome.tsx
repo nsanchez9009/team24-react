@@ -13,6 +13,8 @@ const CourseHome: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [subject, setSubject] = useState<string>('');
+  const [courseNumber, setCourseNumber] = useState<string>('');
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -65,9 +67,69 @@ const CourseHome: React.FC = () => {
     }
   };
 
+  const addClass = async () => {
+    if (!subject || subject.length !== 3 || !courseNumber) {
+      setError('Please enter a valid 3-character subject and course number');
+      return;
+    }
+
+    const className = `${subject.toUpperCase()}${courseNumber.toUpperCase()}`;
+
+    try {
+      const token = sessionStorage.getItem('token');
+      const response = await fetch(`${API_URL}/user/addclass`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ className }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to add class');
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser); // Update the user data with the new class list
+      setSubject(''); // Clear input fields
+      setCourseNumber('');
+      setError(null); // Clear error
+    } catch (err) {
+      setError('Error adding class');
+      console.error(err);
+    }
+  };
+
+  const deleteClass = async (className: string) => {
+    try {
+      const token = sessionStorage.getItem('token');
+      const response = await fetch(`${API_URL}/user/deleteclass`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ className }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete class');
+      }
+
+      // Update local user state to remove the class
+      setUser((prevUser) =>
+        prevUser ? { ...prevUser, classes: prevUser.classes.filter((cls) => cls !== className) } : null
+      );
+    } catch (err) {
+      setError('Error deleting class');
+      console.error(err);
+    }
+  };
+
   return (
     <div className="container d-flex justify-content-center align-items-center">
-      <div className="row w-100" style={{ maxWidth: '800px' }}>
+      <div className="row w-100" style={{ maxWidth: '1000px' }}>
         
         {/* Left Box - List of Classes */}
         <div className="col-md-6 p-3">
@@ -81,7 +143,7 @@ const CourseHome: React.FC = () => {
                     {course}
                     <div>
                       <button className="btn btn-sm btn-primary me-2">Select</button>
-                      <button className="btn btn-sm btn-danger">Delete</button>
+                      <button className="btn btn-sm btn-danger" onClick={() => deleteClass(course)}>Delete</button>
                     </div>
                   </li>
                 ))
@@ -92,26 +154,37 @@ const CourseHome: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Box - Selected University and Search */}
+        {/* Right Box - Selected University and Add Class Form */}
         <div className="col-md-6 p-3">
-          <div className="bg-light p-4 rounded shadow">
+          <div className="bg-light p-4 rounded shadow d-flex flex-column">
             <div className="d-flex justify-content-between align-items-center mb-4">
-              <h5 className="m-0">
+              <h5 className="m-0 flex-grow-1 text-wrap">
                 {user?.school ? user.school : 'No school selected'}
               </h5>
-              <button className="btn btn-secondary btn-sm" onClick={() => setShowModal(true)}>Change</button>
+              <button className="btn btn-secondary btn-sm ms-2" style={{ minWidth: '80px' }} onClick={() => setShowModal(true)}>Change</button>
             </div>
 
-            {/* Search Bar */}
-            <h5 className="text-center">Search for Classes</h5>
+            {/* Add Class Form */}
+            <h5 className="text-center">Add a New Class</h5>
             <div className="input-group mt-3">
               <input
                 type="text"
                 className="form-control"
-                placeholder="Search for classes..."
-                aria-label="Search for classes"
+                placeholder="Course Subject"
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                maxLength={3} // Limit subject input to 3 characters
+                style={{ minWidth: '100px' }}
               />
-              <button className="btn btn-primary" type="button">Search</button>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Course Number"
+                value={courseNumber}
+                onChange={(e) => setCourseNumber(e.target.value)}
+                style={{ minWidth: '150px', marginLeft: '8px' }}
+              />
+              <button className="btn btn-primary" type="button" onClick={addClass}>Add Class</button>
             </div>
           </div>
         </div>

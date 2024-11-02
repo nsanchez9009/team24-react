@@ -46,7 +46,7 @@ const Register: React.FC = () => {
         throw new Error('Failed to register. Please try again.');
       }
 
-      setSuccess('Registration successful!');
+      setSuccess('Registration successful! Please check your email to verify your account.');
       setError('');
       
       // Simulate navigation to Login page after registration

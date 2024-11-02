@@ -29,7 +29,13 @@ const Login: React.FC = () => {
         });
 
         if (!response.ok) {
-            throw new Error('Invalid credentials');
+            const errorData = await response.json();
+            if (errorData.message === 'Please verify your email before logging in.') {
+                setError('Please verify your email before logging in.');
+            } else {
+                setError('Invalid credentials');
+            }
+            return;
         }
 
         // Parse the JSON response to get the token
