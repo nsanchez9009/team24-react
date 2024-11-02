@@ -1,7 +1,7 @@
-// src/pages/CourseHome.tsx
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { API_URL } from '../config';
+import SchoolSearchModal from '../components/SchoolSearchModal';
 
 interface User {
   username: string;
@@ -12,6 +12,7 @@ interface User {
 const CourseHome: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -40,6 +41,29 @@ const CourseHome: React.FC = () => {
 
     fetchUserData();
   }, []);
+
+  const updateUserSchool = async (school: string) => {
+    try {
+      const token = sessionStorage.getItem('token');
+      const response = await fetch(`${API_URL}/user/updateSchool`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ school }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update school');
+      }
+
+      setUser((prevUser) => prevUser ? { ...prevUser, school } : null);
+    } catch (err) {
+      setError('Error updating school');
+      console.error(err);
+    }
+  };
 
   return (
     <div className="container d-flex justify-content-center align-items-center">
@@ -75,7 +99,7 @@ const CourseHome: React.FC = () => {
               <h5 className="m-0">
                 {user?.school ? user.school : 'No school selected'}
               </h5>
-              <button className="btn btn-secondary btn-sm">Change</button>
+              <button className="btn btn-secondary btn-sm" onClick={() => setShowModal(true)}>Change</button>
             </div>
 
             {/* Search Bar */}
@@ -91,11 +115,18 @@ const CourseHome: React.FC = () => {
             </div>
           </div>
         </div>
-
       </div>
 
       {/* Error Message */}
       {error && <div className="alert alert-danger mt-3">{error}</div>}
+
+      {/* School Search Modal */}
+      {showModal && (
+        <SchoolSearchModal
+          onClose={() => setShowModal(false)}
+          onSelectSchool={updateUserSchool}
+        />
+      )}
     </div>
   );
 };
