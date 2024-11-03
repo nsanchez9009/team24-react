@@ -7,10 +7,17 @@ const ResetPassword: React.FC = () => {
     const navigate = useNavigate();
     const token = new URLSearchParams(location.search).get('token');
     const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
     const handleResetPassword = async () => {
+        // Check if passwords match
+        if (newPassword !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+
         try {
             const response = await fetch(`${API_URL}/auth/reset-password`, {
                 method: 'POST',
@@ -40,6 +47,13 @@ const ResetPassword: React.FC = () => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         className="form-control my-3"
+                    />
+                    <input
+                        type="password"
+                        placeholder="Confirm Password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="form-control mb-3"
                     />
                     <button onClick={handleResetPassword} className="btn btn-primary">Submit</button>
                 </>
