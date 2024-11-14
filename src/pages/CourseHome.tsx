@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { API_URL } from '../config';
 import SchoolSearchModal from '../components/SchoolSearchModal';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   username: string;
@@ -15,6 +16,7 @@ const CourseHome: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [subject, setSubject] = useState<string>('');
   const [courseNumber, setCourseNumber] = useState<string>('');
+  const navigate = useNavigate();
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -126,6 +128,14 @@ const CourseHome: React.FC = () => {
       console.error(err);
     }
   };
+  
+  const handleClassSelect = (className: string) => {
+    if (user?.school) {
+      navigate('/lobby-list', { state: { className, school: user.school } });
+    } else {
+      setError('Please select a school first');
+    }
+  };
 
   return (
     <div className="container d-flex justify-content-center align-items-center">
@@ -142,7 +152,7 @@ const CourseHome: React.FC = () => {
                   <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
                     {course}
                     <div>
-                      <button className="btn btn-sm btn-primary me-2">Select</button>
+                      <button className="btn btn-sm btn-primary me-2" onClick={() => handleClassSelect(course)}>Select</button>
                       <button className="btn btn-sm btn-danger" onClick={() => deleteClass(course)}>Delete</button>
                     </div>
                   </li>
@@ -154,7 +164,7 @@ const CourseHome: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Box - Selected University and Add Class Form */}
+        {/* Right Box - Selected School and Add Class Form */}
         <div className="col-md-6 p-3">
           <div className="bg-light p-4 rounded shadow d-flex flex-column">
             <div className="d-flex justify-content-between align-items-center mb-4">

@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import CourseHome from './pages/CourseHome';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
+import LobbyList from './pages/LobbyList';
+import LobbyPage from './pages/LobbyPage';
 
 const AppHeader: React.FC = () => {
   const location = useLocation();
@@ -52,9 +54,12 @@ const App: React.FC = () => {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/course-home" element={<CourseHome />} />
-            <Route path="*" element={<Navigate to="/" />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/lobby-list" element={<LobbyList />} />
+            <Route path="/lobby/:lobbyId" element={<LobbyPage />} />
+            {/* Wildcard route as the last route */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
       </div>
