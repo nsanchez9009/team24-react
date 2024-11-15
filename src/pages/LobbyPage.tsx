@@ -30,51 +30,37 @@ const LobbyPage: React.FC = () => {
     }
 
     console.log(`Joining lobby: ${lobbyId} as ${username}`);
-    // Emit joinLobby to add the user to the lobby
+    // Join the lobby
     socket.emit('joinLobby', { lobbyId, username });
 
-    // Listen for real-time updates
-    socket.on('userList', (users: string[]) => {
-      console.log('Updated user list:', users);
-      setUserList(users);
-    });
-
-    socket.on('receiveMessage', (message: Message) => {
-      console.log('New message received:', message);
-      setMessages((prev) => [...prev, message]);
-    });
-
+    // Real-time event listeners
+    socket.on('userList', (users: string[]) => setUserList(users));
+    socket.on('receiveMessage', (message: Message) => setMessages((prev) => [...prev, message]));
     socket.on('lobbyClosed', () => {
-      console.log('Lobby closed by the host.');
       setError('The lobby was closed by the host.');
+      navigate('/course-home'); // Navigate back when lobby closes
     });
+    socket.on('error', (serverError: string) => setError(serverError));
 
-    // Cleanup logic
     const handleLeave = () => {
-      console.log(`Leaving lobby: ${lobbyId}`);
       socket.emit('leaveLobby', { lobbyId, username });
+      console.log(`User ${username} left lobby: ${lobbyId}`);
     };
 
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      e.preventDefault();
-      handleLeave();
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('beforeunload', handleLeave);
 
     return () => {
-      console.log(`Cleaning up listeners for lobby: ${lobbyId}`);
       handleLeave();
       socket.off('userList');
       socket.off('receiveMessage');
       socket.off('lobbyClosed');
-      window.removeEventListener('beforeunload', handleBeforeUnload);
+      socket.off('error');
+      window.removeEventListener('beforeunload', handleLeave);
     };
   }, [lobbyId, username, navigate]);
 
   const sendMessage = () => {
     if (inputMessage.trim()) {
-      console.log(`Sending message: "${inputMessage}" from ${username}`);
       socket.emit('sendMessage', { lobbyId, message: inputMessage, username });
       setInputMessage('');
     }
@@ -113,7 +99,6 @@ const LobbyPage: React.FC = () => {
           </ul>
           <button
             onClick={() => {
-              console.log('Manually leaving lobby:', lobbyId);
               socket.emit('leaveLobby', { lobbyId, username });
               navigate('/course-home');
             }}

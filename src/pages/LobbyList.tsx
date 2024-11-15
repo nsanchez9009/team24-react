@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { API_URL, SOCKET_URL } from '../config';
 import io from 'socket.io-client';
 
+const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'], secure: true });
+
 interface Lobby {
   _id: string;
   lobbyId: string;
@@ -14,12 +16,11 @@ interface Lobby {
   currentUsers: number;
 }
 
-const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'], secure: true });
-
 const LobbyList: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { className, school } = location.state as { className: string; school: string };
+
   const [lobbies, setLobbies] = useState<Lobby[]>([]);
   const [showCreateLobbyModal, setShowCreateLobbyModal] = useState(false);
   const [lobbyName, setLobbyName] = useState('');
@@ -30,6 +31,11 @@ const LobbyList: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       const token = sessionStorage.getItem('token');
+      if (!token) {
+        setError('Authentication token not found.');
+        return;
+      }
+
       try {
         const response = await fetch(`${API_URL}/user/getuser`, {
           headers: {
@@ -37,14 +43,28 @@ const LobbyList: React.FC = () => {
             Authorization: `Bearer ${token}`,
           },
         });
+
+        if (!response.ok) throw new Error('Failed to fetch user data.');
         const data = await response.json();
         setUser(data);
-      } catch {
+        fetchLobbies(); // Fetch lobbies after successful user data retrieval
+      } catch (err) {
         setError('Failed to fetch user data.');
       }
     };
+
     fetchUserData();
-  }, []);
+
+    // Socket event listener for real-time lobby updates
+    socket.on('updateLobbyList', fetchLobbies);
+    socket.on('connect_error', () => setError('Failed to connect to the server.'));
+
+    return () => {
+      socket.off('updateLobbyList', fetchLobbies);
+      socket.off('connect_error');
+      socket.disconnect();
+    };
+  }, [className, school]);
 
   const fetchLobbies = async () => {
     try {
@@ -57,20 +77,12 @@ const LobbyList: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    fetchLobbies();
-
-    // Listen for real-time updates
-    socket.on('updateLobbyList', fetchLobbies);
-
-    return () => {
-      socket.off('updateLobbyList', fetchLobbies);
-      socket.disconnect();
-    };
-  }, [className, school]);
-
   const createLobby = async () => {
-    const token = sessionStorage.getItem('token');
+    if (!user?.username) {
+      setError('You must be logged in to create a lobby.');
+      return;
+    }
+
     if (!lobbyName) {
       setError('Lobby name is required');
       return;
@@ -82,6 +94,7 @@ const LobbyList: React.FC = () => {
     }
 
     try {
+      const token = sessionStorage.getItem('token');
       const response = await fetch(`${API_URL}/lobbies/create`, {
         method: 'POST',
         headers: {
@@ -92,7 +105,7 @@ const LobbyList: React.FC = () => {
           name: lobbyName,
           className,
           school,
-          host: user?.username,
+          host: user.username,
           maxUsers,
         }),
       });
@@ -100,7 +113,6 @@ const LobbyList: React.FC = () => {
       if (!response.ok) throw new Error('Failed to create lobby');
       const newLobby = await response.json();
 
-      // Automatically join the newly created lobby
       joinLobby(newLobby.lobbyId, newLobby.name);
       setLobbyName('');
       setMaxUsers(4);
