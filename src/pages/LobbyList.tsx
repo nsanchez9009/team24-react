@@ -5,6 +5,7 @@ import io from 'socket.io-client';
 
 interface Lobby {
   _id: string;
+  lobbyId: string;
   name: string;
   className: string;
   school: string;
@@ -12,6 +13,8 @@ interface Lobby {
   maxUsers: number;
   currentUsers: number;
 }
+
+const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'], secure: true });
 
 const LobbyList: React.FC = () => {
   const navigate = useNavigate();
@@ -27,14 +30,18 @@ const LobbyList: React.FC = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       const token = sessionStorage.getItem('token');
-      const response = await fetch(`${API_URL}/user/getuser`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      setUser(data);
+      try {
+        const response = await fetch(`${API_URL}/user/getuser`, {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await response.json();
+        setUser(data);
+      } catch {
+        setError('Failed to fetch user data.');
+      }
     };
     fetchUserData();
   }, []);
@@ -45,7 +52,7 @@ const LobbyList: React.FC = () => {
       if (!response.ok) throw new Error('Failed to fetch lobbies');
       const data = await response.json();
       setLobbies(data);
-    } catch (err) {
+    } catch {
       setError('Error loading lobbies');
     }
   };
@@ -53,13 +60,9 @@ const LobbyList: React.FC = () => {
   useEffect(() => {
     fetchLobbies();
 
-    // Initialize socket connection for lobby updates
-    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'], secure: true });
-
-    // Fetch lobbies when there's an update
+    // Listen for real-time updates
     socket.on('updateLobbyList', fetchLobbies);
 
-    // Clean up socket connection on component unmount
     return () => {
       socket.off('updateLobbyList', fetchLobbies);
       socket.disconnect();
@@ -83,31 +86,43 @@ const LobbyList: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name: lobbyName, className, school, host: user?.username, maxUsers }),
+        body: JSON.stringify({
+          name: lobbyName,
+          className,
+          school,
+          host: user?.username,
+          maxUsers,
+        }),
       });
+
       if (!response.ok) throw new Error('Failed to create lobby');
       const newLobby = await response.json();
 
-      // Automatically join the newly created lobby and navigate to LobbyPage
-      joinLobby(newLobby._id, newLobby.name);
+      // Automatically join the newly created lobby
+      joinLobby(newLobby.lobbyId, newLobby.name);
       setLobbyName('');
       setMaxUsers(4);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Error creating lobby');
     }
   };
 
   const joinLobby = (lobbyId: string, lobbyName: string) => {
+    if (!user?.username) {
+      setError('You must be logged in to join a lobby.');
+      return;
+    }
+
     navigate(`/lobby/${lobbyId}`, {
       state: {
         lobbyId,
         lobbyName,
         className,
         school,
-        username: user?.username,
+        username: user.username,
       },
     });
   };
@@ -115,14 +130,12 @@ const LobbyList: React.FC = () => {
   return (
     <div className="container d-flex justify-content-center align-items-center">
       <div className="bg-light p-4 rounded shadow" style={{ width: '100%', maxWidth: '600px' }}>
-        
-        {/* Back to CourseHome Button */}
         <button className="btn btn-secondary mb-3" onClick={() => navigate('/course-home')}>
           Back to Classes
         </button>
-        
+
         <h2 className="text-center mb-4">Available Lobbies for {className}</h2>
-        
+
         <button className="btn btn-primary w-100 mb-3" onClick={() => setShowCreateLobbyModal(true)}>
           Create Lobby
         </button>
@@ -130,18 +143,22 @@ const LobbyList: React.FC = () => {
         {lobbies.length ? (
           <ul className="list-group">
             {lobbies.map((lobby) => (
-              <li key={lobby._id} className="list-group-item d-flex justify-content-between align-items-center">
+              <li key={lobby.lobbyId} className="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                   <strong>{lobby.name}</strong>
                   <span className="d-block small text-muted">Host: {lobby.host}</span>
-                  <span className="d-block small text-muted">{lobby.currentUsers}/{lobby.maxUsers} users</span>
+                  <span className="d-block small text-muted">
+                    {lobby.currentUsers}/{lobby.maxUsers} users
+                  </span>
                 </div>
                 {lobby.currentUsers < lobby.maxUsers ? (
-                  <button className="btn btn-primary btn-sm" onClick={() => joinLobby(lobby._id, lobby.name)}>
+                  <button className="btn btn-primary btn-sm" onClick={() => joinLobby(lobby.lobbyId, lobby.name)}>
                     Join
                   </button>
                 ) : (
-                  <button className="btn btn-secondary btn-sm" disabled>Full</button>
+                  <button className="btn btn-secondary btn-sm" disabled>
+                    Full
+                  </button>
                 )}
               </li>
             ))}
@@ -169,7 +186,9 @@ const LobbyList: React.FC = () => {
                     className="form-control mb-3"
                     required
                   />
-                  <label htmlFor="maxUsers" className="form-label">Max Users (2-4)</label>
+                  <label htmlFor="maxUsers" className="form-label">
+                    Max Users (2-4)
+                  </label>
                   <select
                     id="maxUsers"
                     className="form-select"
@@ -182,8 +201,12 @@ const LobbyList: React.FC = () => {
                   </select>
                 </div>
                 <div className="modal-footer">
-                  <button className="btn btn-secondary" onClick={() => setShowCreateLobbyModal(false)}>Cancel</button>
-                  <button className="btn btn-primary" onClick={createLobby}>Create Lobby</button>
+                  <button className="btn btn-secondary" onClick={() => setShowCreateLobbyModal(false)}>
+                    Cancel
+                  </button>
+                  <button className="btn btn-primary" onClick={createLobby}>
+                    Create Lobby
+                  </button>
                 </div>
               </div>
             </div>

@@ -24,38 +24,57 @@ const LobbyPage: React.FC = () => {
 
   useEffect(() => {
     if (!lobbyId || !lobbyName || !className || !school || !username) {
+      console.error('Invalid lobby details provided.');
       navigate('/course-home');
       return;
     }
 
-    // Join the lobby
+    console.log(`Joining lobby: ${lobbyId} as ${username}`);
+    // Emit joinLobby to add the user to the lobby
     socket.emit('joinLobby', { lobbyId, username });
 
-    // Event listeners
-    socket.on('userList', (users: string[]) => setUserList(users));
-    socket.on('receiveMessage', (message: Message) => setMessages((prev) => [...prev, message]));
+    // Listen for real-time updates
+    socket.on('userList', (users: string[]) => {
+      console.log('Updated user list:', users);
+      setUserList(users);
+    });
+
+    socket.on('receiveMessage', (message: Message) => {
+      console.log('New message received:', message);
+      setMessages((prev) => [...prev, message]);
+    });
+
     socket.on('lobbyClosed', () => {
+      console.log('Lobby closed by the host.');
       setError('The lobby was closed by the host.');
     });
 
-    // Clean up and leave lobby on unmount
+    // Cleanup logic
     const handleLeave = () => {
-      socket.emit('leaveLobby', lobbyId); // Only leave the lobby
+      console.log(`Leaving lobby: ${lobbyId}`);
+      socket.emit('leaveLobby', { lobbyId, username });
     };
-    
-    window.addEventListener('beforeunload', handleLeave);
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      handleLeave();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
+      console.log(`Cleaning up listeners for lobby: ${lobbyId}`);
       handleLeave();
       socket.off('userList');
       socket.off('receiveMessage');
       socket.off('lobbyClosed');
-      window.removeEventListener('beforeunload', handleLeave);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [lobbyId, username, navigate]);
 
   const sendMessage = () => {
     if (inputMessage.trim()) {
+      console.log(`Sending message: "${inputMessage}" from ${username}`);
       socket.emit('sendMessage', { lobbyId, message: inputMessage, username });
       setInputMessage('');
     }
@@ -88,11 +107,14 @@ const LobbyPage: React.FC = () => {
           <p><strong>School:</strong> {school}</p>
           <p><strong>Users:</strong></p>
           <ul>
-            {userList.map((user) => <li key={user}>{user}</li>)}
+            {userList.map((user) => (
+              <li key={user}>{user}</li>
+            ))}
           </ul>
           <button
             onClick={() => {
-              socket.emit('leaveLobby', lobbyId);
+              console.log('Manually leaving lobby:', lobbyId);
+              socket.emit('leaveLobby', { lobbyId, username });
               navigate('/course-home');
             }}
             className="btn btn-danger mt-3"
@@ -103,7 +125,15 @@ const LobbyPage: React.FC = () => {
 
         {/* Chat Box */}
         <div className="bg-light p-3 rounded shadow flex-grow-1" style={{ width: '500px' }}>
-          <div style={{ height: '400px', overflowY: 'auto', padding: '10px', border: '1px solid #ccc', marginBottom: '10px' }}>
+          <div
+            style={{
+              height: '400px',
+              overflowY: 'auto',
+              padding: '10px',
+              border: '1px solid #ccc',
+              marginBottom: '10px',
+            }}
+          >
             {messages.map((msg, index) => (
               <div key={index}>
                 <strong>{msg.username}</strong>: {msg.text}
