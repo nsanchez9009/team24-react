@@ -66,8 +66,14 @@ const LobbyPage: React.FC = () => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  };
+
   return (
-    <div className="container d-flex justify-content-center align-items-center vh-100">
+    <div className="container d-flex justify-content-center align-items-center">
       {error && (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog">
@@ -130,6 +136,7 @@ const LobbyPage: React.FC = () => {
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
+              onKeyDown={handleKeyDown}
               className="form-control me-2"
               placeholder="Type a message..."
             />
