@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SOCKET_URL } from '../config';
@@ -22,6 +22,8 @@ const LobbyPage: React.FC = () => {
   const navigate = useNavigate();
   const { lobbyId, lobbyName, className, school, username } = location.state || {};
 
+  const messagesEndRef = useRef<HTMLDivElement>(null); // Reference to the message container
+
   useEffect(() => {
     if (!lobbyId || !lobbyName || !className || !school || !username) {
       console.error('Invalid lobby details provided.');
@@ -35,11 +37,22 @@ const LobbyPage: React.FC = () => {
 
     // Real-time event listeners
     socket.on('userList', (users: string[]) => setUserList(users));
-    socket.on('receiveMessage', (message: Message) => setMessages((prev) => [...prev, message]));
+
+    socket.on('receiveMessage', (message: Message) => {
+      console.log('New message received:', message);
+      setMessages((prev) => [...prev, message]);
+    });
+
+    socket.on('initialMessages', (loadedMessages: Message[]) => {
+      console.log('Loaded persistent messages:', loadedMessages);
+      setMessages(loadedMessages);
+    });
+
     socket.on('lobbyClosed', () => {
       setError('The lobby was closed by the host.');
-      navigate('/course-home'); // Navigate back when lobby closes
+      navigate('/course-home');
     });
+
     socket.on('error', (serverError: string) => setError(serverError));
 
     const handleLeave = () => {
@@ -55,9 +68,15 @@ const LobbyPage: React.FC = () => {
       socket.off('receiveMessage');
       socket.off('lobbyClosed');
       socket.off('error');
+      socket.off('initialMessages');
       window.removeEventListener('beforeunload', handleLeave);
     };
   }, [lobbyId, username, navigate]);
+
+  useEffect(() => {
+    // Auto-scroll to the bottom whenever the messages array changes
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendMessage = () => {
     if (inputMessage.trim()) {
@@ -85,7 +104,9 @@ const LobbyPage: React.FC = () => {
                 <p>{error}</p>
               </div>
               <div className="modal-footer">
-                <button onClick={() => navigate('/course-home')} className="btn btn-primary">Back to Classes</button>
+                <button onClick={() => navigate('/course-home')} className="btn btn-primary">
+                  Back to Classes
+                </button>
               </div>
             </div>
           </div>
@@ -95,9 +116,15 @@ const LobbyPage: React.FC = () => {
         {/* Lobby Details */}
         <div className="bg-light p-3 rounded shadow me-3" style={{ minWidth: '200px' }}>
           <h5>{lobbyName}</h5>
-          <p><strong>Class:</strong> {className}</p>
-          <p><strong>School:</strong> {school}</p>
-          <p><strong>Users:</strong></p>
+          <p>
+            <strong>Class:</strong> {className}
+          </p>
+          <p>
+            <strong>School:</strong> {school}
+          </p>
+          <p>
+            <strong>Users:</strong>
+          </p>
           <ul>
             {userList.map((user) => (
               <li key={user}>{user}</li>
@@ -130,6 +157,7 @@ const LobbyPage: React.FC = () => {
                 <strong>{msg.username}</strong>: {msg.text}
               </div>
             ))}
+            <div ref={messagesEndRef} /> {/* Reference for auto-scroll */}
           </div>
           <div className="d-flex">
             <input
@@ -140,7 +168,9 @@ const LobbyPage: React.FC = () => {
               className="form-control me-2"
               placeholder="Type a message..."
             />
-            <button onClick={sendMessage} className="btn btn-primary">Send</button>
+            <button onClick={sendMessage} className="btn btn-primary">
+              Send
+            </button>
           </div>
         </div>
       </div>
