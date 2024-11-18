@@ -83,7 +83,7 @@ const LobbyList: React.FC = () => {
       return;
     }
 
-    if (!lobbyName) {
+    if (!lobbyName.trim()) {
       setError('Lobby name is required');
       return;
     }
@@ -102,7 +102,7 @@ const LobbyList: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          name: lobbyName,
+          name: lobbyName.trim(),
           className,
           school,
           host: user.username,
