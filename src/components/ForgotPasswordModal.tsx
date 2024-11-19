@@ -58,7 +58,14 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ show, onClose
           {!successMessage && (
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-              <button type="button" className="btn btn-primary" onClick={handleForgotPassword}>Send Reset Link</button>
+              <button 
+                type="button" 
+                className="btn" 
+                style={{ backgroundColor: '#6193A9', borderColor: '#6193A9', color: 'white' }} 
+                onClick={handleForgotPassword}
+              >
+                Send Reset Link
+              </button>
             </div>
           )}
         </div>
