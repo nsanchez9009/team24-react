@@ -1,4 +1,5 @@
 import React from 'react';
+import { GoHomeFill } from "react-icons/go";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, Link, useNavigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Register from './pages/Register';
@@ -29,8 +30,21 @@ const AppHeader: React.FC = () => {
     <header className="bg-light py-3 text-center d-flex justify-content-between align-items-center px-4">
       <h1 className="display-4 fw-bold m-0">STUDY BUDDY</h1>
       <div>
-        {showHomeButton && (
-          <Link to="/" className="btn btn-secondary me-2">Home</Link>
+      {showHomeButton && (
+          <Link
+            to="/"
+            className="btn me-2"
+            style={{
+              backgroundColor: '#9BBECD', // Apply custom color
+              borderColor: '#9BBECD',
+              color: 'white', // Text color
+              fontFamily: '"Karla", sans-serif',
+              fontSize: '20px',
+            }}
+          >
+            <GoHomeFill style={{ marginRight: '4px', marginBottom: '4px', color: 'white' }} />
+            Home
+          </Link>
         )}
         {isLoggedIn && (
           <button onClick={handleLogout} className="btn btn-outline-danger">Logout</button>
