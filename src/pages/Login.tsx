@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { API_URL } from '../config';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
+import background from '../assets/background.jpg';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -45,7 +46,20 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center">
+    <div
+      style={{
+        backgroundImage: `url(${background})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        minHeight: '100vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',          alignItems: 'center',
+        margin: 0,
+        padding: 0,
+        fontFamily: '"Karla", sans-serif',
+      }}
+    >
       <div className="bg-light p-4 rounded shadow" style={{ width: '100%', maxWidth: '400px' }}>
         <h2 className="text-center mb-4">Login</h2>
 
@@ -86,7 +100,10 @@ const Login: React.FC = () => {
 
         {error && <div className="alert alert-danger text-center">{error}</div>}
 
-        <button onClick={handleLogin} className="btn btn-primary w-100 mb-3">Login</button>
+        <button onClick={handleLogin} 
+        className="btn btn-primary w-100 mb-3"
+        style={{ backgroundColor: '#6193A9', borderColor: '#6193A9' }}
+        >Login</button>
 
         <p className="text-center">
           <small>Don't have an account? <span className="text-primary" style={{ cursor: 'pointer' }} onClick={() => navigate('/register')}>Register</span></small>
