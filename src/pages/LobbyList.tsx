@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { API_URL, SOCKET_URL } from '../config';
 import io from 'socket.io-client';
+import background from '../assets/background.jpg';
 
 const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'], secure: true });
 
@@ -140,7 +141,20 @@ const LobbyList: React.FC = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center">
+    <div
+      style={{
+        backgroundImage: `url(${background})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '100vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 0,
+        padding: 0,
+      }}
+    >
       <div className="bg-light p-4 rounded shadow" style={{ width: '100%', maxWidth: '600px' }}>
         <button className="btn btn-secondary mb-3" onClick={() => navigate('/course-home')}>
           Back to Classes
@@ -148,7 +162,11 @@ const LobbyList: React.FC = () => {
 
         <h2 className="text-center mb-4">Available Lobbies for {className}</h2>
 
-        <button className="btn btn-primary w-100 mb-3" onClick={() => setShowCreateLobbyModal(true)}>
+        <button
+          style={{ backgroundColor: '#6193A9', borderColor: '#6193A9', color: '#fff' }}
+          className="btn w-100 mb-3"
+          onClick={() => setShowCreateLobbyModal(true)}
+        >
           Create Lobby
         </button>
 
@@ -216,7 +234,10 @@ const LobbyList: React.FC = () => {
                   <button className="btn btn-secondary" onClick={() => setShowCreateLobbyModal(false)}>
                     Cancel
                   </button>
-                  <button className="btn btn-primary" onClick={createLobby}>
+                  <button 
+                    className="btn btn-primary"
+                    style={{ backgroundColor: '#6193A9', borderColor: '#6193A9', color: '#fff' }}
+                    onClick={createLobby}>
                     Create Lobby
                   </button>
                 </div>

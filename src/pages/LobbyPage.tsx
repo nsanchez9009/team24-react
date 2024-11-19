@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SOCKET_URL } from '../config';
+import background from '../assets/background.jpg';
 
 const socket = io(SOCKET_URL, {
   transports: ['websocket', 'polling'],
@@ -92,7 +93,20 @@ const LobbyPage: React.FC = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center">
+    <div
+      style={{
+        backgroundImage: `url(${background})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '100vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 0,
+        padding: 0,
+      }}
+    >
       {error && (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog">
@@ -168,7 +182,10 @@ const LobbyPage: React.FC = () => {
               className="form-control me-2"
               placeholder="Type a message..."
             />
-            <button onClick={sendMessage} className="btn btn-primary">
+            <button
+              style={{ backgroundColor: '#6193A9', borderColor: '#6193A9', color: '#fff' }}
+              onClick={sendMessage} 
+              className="btn btn-primary">
               Send
             </button>
           </div>
