@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { API_URL } from '../config';
+import background from '../assets/background.jpg';
 
 const ResetPassword: React.FC = () => {
     const location = useLocation();
@@ -35,7 +36,19 @@ const ResetPassword: React.FC = () => {
     };
 
     return (
-        <div className="container d-flex justify-content-center align-items-center">
+        <div
+            style={{
+                backgroundImage: `url(${background})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                minHeight: '100vh',
+                width: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                fontFamily: '"Karla", sans-serif',
+            }}
+        >
             <div className="bg-light p-4 rounded shadow" style={{ width: '100%', maxWidth: '400px' }}>
                 <h2 className="text-center mb-4">Reset Password</h2>
                 
@@ -55,7 +68,13 @@ const ResetPassword: React.FC = () => {
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             className="form-control mb-3"
                         />
-                        <button onClick={handleResetPassword} className="btn btn-primary w-100">Submit</button>
+                        <button 
+                            onClick={handleResetPassword} 
+                            className="btn w-100" 
+                            style={{ backgroundColor: '#6193A9', borderColor: '#6193A9' }}
+                        >
+                            Submit
+                        </button>
                     </>
                 ) : (
                     <>
