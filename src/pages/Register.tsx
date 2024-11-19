@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { API_URL } from '../config.ts';
+import background from '../assets/background.jpg';
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -59,10 +60,25 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center">
+    <div
+      style={{
+        backgroundImage: `url(${background})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '100vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: 0,
+        padding: 0,
+        fontFamily: '"Karla", sans-serif',
+        overflow: 'hidden',
+      }}
+    >
       <div className="bg-light p-4 rounded shadow" style={{ width: '100%', maxWidth: '400px' }}>
         <h2 className="text-center mb-4">Register</h2>
-
+        
         {/* Username Input */}
         <div className="mb-3">
           <label htmlFor="username" className="form-label">Username</label>
@@ -111,7 +127,10 @@ const Register: React.FC = () => {
         {success && <div className="alert alert-success text-center">{success}</div>}
 
         {/* Register Button */}
-        <button onClick={handleRegister} className="btn btn-primary w-100 mb-3">Register</button>
+        <button onClick={handleRegister}
+        className="btn btn-primary w-100 mb-3"
+        style={{ backgroundColor: '#6193A9', borderColor: '#6193A9' }}
+        >Register</button>
 
         {/* Link to Login Page */}
         <p className="text-center">
