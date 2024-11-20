@@ -91,8 +91,7 @@ const Home: React.FC = () => {
           </h3>
           <ul className="list-unstyled text-start">
             <li className="mb-3">➤ Add your courses</li>
-            <li className="mb-3">➤ Select Time Availability</li>
-            <li className="mb-3">➤ Connect with other <strong>highly-rated scholars</strong></li>
+            <li className="mb-3">➤ Connect and <strong>live chat</strong> with other <strong> highly-rated scholars </strong> </li>
             <li>➤ Study and improve your grades!</li>
           </ul>
         </div>
