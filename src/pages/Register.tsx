@@ -65,7 +65,7 @@ const Register: React.FC = () => {
         backgroundImage: `url(${background})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        height: '100vh',
+        height: '89vh',
         width: '100%',
         display: 'flex',
         justifyContent: 'center',

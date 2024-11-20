@@ -16,7 +16,7 @@ const Home: React.FC = () => {
         backgroundImage: `url(${background})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        minHeight: '100vh',
+        height: '89vh',
         width: '100%',
         display: 'flex',
         justifyContent: 'center',

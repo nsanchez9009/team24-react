@@ -41,7 +41,7 @@ const ResetPassword: React.FC = () => {
                 backgroundImage: `url(${background})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                minHeight: '100vh',
+                minHeight: '89vh',
                 width: '100%',
                 display: 'flex',
                 justifyContent: 'center',

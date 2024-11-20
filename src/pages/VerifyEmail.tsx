@@ -35,7 +35,7 @@ const VerifyEmail: React.FC = () => {
     }, [token]);
 
     return (
-        <div className="container d-flex justify-content-center align-items-center vh-100">
+        <div className="container d-flex justify-content-center align-items-center vh-89">
             <div className="bg-light p-4 rounded shadow" style={{ maxWidth: '400px', width: '100%' }}>
                 <h2 className="text-center mb-4">Email Verification</h2>
                 {message ? (
